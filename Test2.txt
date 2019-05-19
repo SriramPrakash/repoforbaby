@@ -1,0 +1,112 @@
+package com.capture;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.*;
+
+public class Test2 {
+
+	public static void main(final String... args) throws Exception {
+		Connection con = null;
+		ResultSet rs = null;
+		Statement stmt = null;
+		try {
+
+			Class.forName("com.mysql.jdbc.Driver");
+			con = DriverManager.getConnection(
+					"jdbc:mysql://localhost:3306/experiment", "root", "password");
+			stmt = con.createStatement();
+			rs =
+					stmt.executeQuery("select * from apple_pie");
+			Map<String, Map<String,Object>> jsonObjectMap = new HashMap<>();
+			Map<String,Object> innerMap =  null;
+			while (rs.next()) {
+				int ruleId= rs.getInt("rule_id");
+				String ruleName = rs.getString("rule_name");
+				String formedKey = ""+ruleId;
+				if(jsonObjectMap.get(formedKey)!=null){
+					innerMap = jsonObjectMap.get(formedKey);
+					innerMap.put("rule_name",ruleName);
+					String problemCode = String.valueOf(innerMap.get("problem_code"));
+					String newProblemCode = rs.getString("problem_code");
+					String newproblemCodes[] = newProblemCode.split(",");
+					for (String newProblemCodezz:newproblemCodes){
+						if(!problemCode.contains(newProblemCodezz)){
+							problemCode = problemCode+","+newProblemCodezz;
+						}
+					}
+					innerMap.put("problem_code",problemCode);
+					String existingLocatorType = String.valueOf(innerMap.get("locator_type"));
+					String newLocatorType = rs.getString("locator_type");
+					if(!newLocatorType.equalsIgnoreCase(existingLocatorType)){
+						existingLocatorType = existingLocatorType + ","+newLocatorType;
+					}
+					innerMap.put("locator_type",existingLocatorType);
+					Set<String> existingLocationIndicator = (Set<String>)innerMap.get("locator_indicator");
+					String newLocationIndicator = rs.getString("locator_indicator");
+					existingLocationIndicator.add(newLocationIndicator);
+					innerMap.put("locator_indicator",existingLocationIndicator);
+					//PC and instance combo
+					List<String> combo = (List<String>)innerMap.get("pc_and_inst");
+					String newProblemCode1 = rs.getString("problem_code_1");
+					String newInstance1 = rs.getString("no_of_inst_1");
+					String newProblemCode2 = rs.getString("problem_code_2");
+					String newInstance2 = rs.getString("no_of_inst_2");
+					String newProblemCode3 = rs.getString("problem_code_3");
+					String newInstance3 = rs.getString("no_of_inst_3");
+					/*singleRow.put(newProblemCode1+" "+newInstance1);
+					singleRow.put(newProblemCode2+" "+newInstance2);
+					singleRow.put(newProblemCode3+" "+newInstance3);*/
+					combo.add(newProblemCode1+" "+newInstance1);
+					combo.add(newProblemCode2+" "+newInstance2);
+					combo.add(newProblemCode3+" "+newInstance3);
+				}else{
+					innerMap = new HashMap<>();
+					innerMap.put("rule_name",ruleName);
+					String newProblemCode = rs.getString("problem_code");
+					innerMap.put("problem_code",newProblemCode);
+					String newLocatorType = rs.getString("locator_type");
+					innerMap.put("locator_type",newLocatorType);
+					Set<String> LocationIndicator = new HashSet<>();
+					String newLocationIndicator = rs.getString("locator_indicator");
+					LocationIndicator.add(newLocationIndicator);
+					innerMap.put("locator_indicator",LocationIndicator);
+					List<String> combo = new ArrayList<>();
+					String newProblemCode1 = rs.getString("problem_code_1");
+					String newInstance1 = rs.getString("no_of_inst_1");
+					String newProblemCode2 = rs.getString("problem_code_2");
+					String newInstance2 = rs.getString("no_of_inst_2");
+					String newProblemCode3 = rs.getString("problem_code_3");
+					String newInstance3 = rs.getString("no_of_inst_3");
+					combo.add(newProblemCode1+" "+newInstance1);
+					combo.add(newProblemCode2+" "+newInstance2);
+					combo.add(newProblemCode3+" "+newInstance3);
+					innerMap.put("pc_and_inst",combo);
+					jsonObjectMap.put(formedKey,innerMap);
+
+				}
+			}
+			JSONArray finalArray = new JSONArray();
+			for(String keys:jsonObjectMap.keySet()){
+				Map<String,Object> object = jsonObjectMap.get(keys);
+				object.put("rule_id",keys);
+				finalArray.put(object);
+			}
+			System.out.println(finalArray);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally{
+			rs.close();
+			stmt.close();
+			con.close();
+		}
+	}
+
+}
+
+
