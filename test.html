@@ -1,0 +1,31 @@
+<HTML><HEAD><TITLE>HTML Form </TITLE><script>
+
+function validateForm() {
+  var x = document.forms["myForm"]["fname"].value;
+  var y = document.forms["myForm"]["age"].value;
+  var z = document.forms["myForm"]["email"].value;
+  if (x == "" || y == "" || z == "") {
+    alert("Name must be filled out");
+    return false;
+  }
+}
+    
+ function store(){
+     var inputEmail= document.forms["myForm"]["email"].value;
+     console.log(inputEmail);
+     localStorage.setItem("email", inputEmail);
+    }
+    
+    function show()
+    {
+        var storedValue = localStorage.getItem("email");
+        alert("saved "+storedValue);
+    }
+</script></HEAD><BODY><form name="myForm" action="/index.html" onsubmit="return validateForm()" method="post">
+    Name: <input type="text" name="fname">
+    Age: <input type="text" name="age">
+    email : <input type="text" name="email">
+    <button onclick="store()" type="button">StoreEmail</button>
+    <button onclick="show()" type="button">ShowEmail</button>
+<input type="submit" value="Submit">
+</form></BODY> </HTML>
